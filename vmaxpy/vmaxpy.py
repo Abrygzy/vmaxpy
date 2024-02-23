@@ -126,7 +126,7 @@ def cal_zmax_sdss(sdss_mags, sdss_mag_errs, sdss_exts, gal_zs, cosmo,survey_z_mi
         raise ValueError('Some galaxies are not in the redshift range of the survey!')
 
     # 先利用kcorrect, 得到每一个星系的绝对星等, 以及这个星系的 kcorrect template coefficients
-    kc = kcorrect.kcorrect.KcorrectSDSS(abcorrect=True, cosmo=cosmo, redshift_range=[0, survey_z_max+0.1]);
+    kc = kcorrect.kcorrect.KcorrectSDSS(abcorrect=True, cosmo=cosmo, redshift_range=[0., survey_z_max+0.05]);
     coeffs = kc.fit_coeffs_asinh(redshift = gal_zs, mag=sdss_mags, mag_err=sdss_mag_errs, extinction=sdss_exts)
     (maggies,ivars) = kcorrect.utils.sdss_asinh_to_maggies(mag=sdss_mags, mag_err=sdss_mag_errs,extinction=sdss_exts)
     ab_mags = kc.absmag(maggies=maggies, ivar=ivars, redshift=gal_zs, coeffs=coeffs)
