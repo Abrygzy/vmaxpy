@@ -3,7 +3,7 @@
 import pandas as pd
 import numpy as np
 from scipy.optimize import brentq
-from astropy.cosmology import Planck18
+from astropy.cosmology import Planck15 as cosmo
 from astropy import units as u
 import kcorrect.kcorrect
 import multiprocessing as mp
@@ -13,7 +13,7 @@ def dist_mod(gal_z, cosmo):
     return 5*np.log10(cosmo.luminosity_distance(gal_z).to(u.pc).value/10)
 
 def cal_v_vmax(sdss_mags, sdss_mag_errs, gal_zs, survey_z_min, survey_z_max, m_max_r):
-    sdss_korr = kcorrect.kcorrect.KcorrectSDSS(abcorrect=True, cosmo=Planck18)
+    sdss_korr = kcorrect.kcorrect.KcorrectSDSS(abcorrect=True, cosmo=cosmo)
     (maggies,ivars) = kcorrect.utils.sdss_asinh_to_maggies(mag=sdss_mags, mag_err=sdss_mag_errs)
     coeffs = sdss_korr.fit_coeffs_asinh(redshift = gal_zs, mag=sdss_mags, mag_err=sdss_mag_errs)
     ab_mags = sdss_korr.absmag(maggies=maggies, ivar=ivars, redshift=gal_zs, coeffs=coeffs)
@@ -38,8 +38,8 @@ def cal_v_vmax(sdss_mags, sdss_mag_errs, gal_zs, survey_z_min, survey_z_max, m_m
             else:
                 # 此时zmax在survey_z_min和survey_z_max之间
                 zmax_list.append(brentq(minimize_zmax, survey_z_min, survey_z_max))
-    v_vmax = ((Planck18.comoving_volume(survey_z_max) - Planck18.comoving_volume(survey_z_min))\
-        / (Planck18.comoving_volume(zmax_list) - Planck18.comoving_volume(survey_z_min))).value
+    v_vmax = ((cosmo.comoving_volume(survey_z_max) - cosmo.comoving_volume(survey_z_min))\
+        / (cosmo.comoving_volume(zmax_list) - cosmo.comoving_volume(survey_z_min))).value
     return v_vmax
 
 def cal_v_vmax_mp(sdss_mags, sdss_mag_errs, gal_zs, z_min, z_max, m_max_r = 17.77 + 0.01):
